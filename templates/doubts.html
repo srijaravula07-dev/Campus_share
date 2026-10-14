@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Doubt Box - Campus Share{% endblock %}
+{% block content %}
+
+<h1>Doubt Box</h1>
+<p class="page-sub">Ask academic doubts, or help answer someone else's.</p>
+
+<form method="get" class="filter-form">
+    <input type="text" name="q" placeholder="Search doubts..." value="{{ selected_q }}" style="flex:2; min-width:180px;">
+    <input type="text" name="subject" placeholder="Subject..." value="{{ selected_subject }}" style="max-width:160px;">
+    <select name="view">
+        <option value="recent" {% if selected_view == 'recent' %}selected{% endif %}>All Recent</option>
+        <option value="unanswered" {% if selected_view == 'unanswered' %}selected{% endif %}>Unanswered</option>
+        <option value="answered" {% if selected_view == 'answered' %}selected{% endif %}>Answered</option>
+    </select>
+    <button type="submit">Apply</button>
+    <a href="{{ url_for('list_doubts') }}" class="clear-link">Clear</a>
+    <a href="{{ url_for('new_doubt') }}" class="cta" style="margin-left:auto; padding:9px 16px; border-radius:3px; text-decoration:none;">+ Ask a Doubt</a>
+</form>
+
+{% if doubts %}
+<div class="resource-grid">
+    {% for d in doubts %}
+    <div class="resource-card">
+        {% if d.status == 'resolved' %}<span class="tag tag-success">Resolved</span>{% else %}<span class="tag tag-active">Open</span>{% endif %}
+        <h3><a href="{{ url_for('view_doubt', doubt_id=d.id) }}">{{ d.title }}</a></h3>
+        <div class="tag-row">
+            <span class="tag">{{ d.subject }}</span>
+            {% if d.tag %}<span class="tag">{{ d.tag }}</span>{% endif %}
+        </div>
+        <p class="meta">Asked by {{ d.asker.name }} · {{ d.created_at.strftime('%d %b %Y') }}</p>
+        <p class="meta">{{ d.answer_count() }} answer{{ 's' if d.answer_count() != 1 }}</p>
+        <a class="btn-small" href="{{ url_for('view_doubt', doubt_id=d.id) }}">Open Doubt</a>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <span class="glyph">◇</span>
+    <p>No doubts have been posted yet. <a href="{{ url_for('new_doubt') }}">Ask the first one</a>.</p>
+</div>
+{% endif %}
+
+{% endblock %}

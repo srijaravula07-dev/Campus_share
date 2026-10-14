@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block title %}Settings - Campus Share{% endblock %}
+{% block content %}
+
+<h1>Settings</h1>
+<p class="page-sub">Manage your account, appearance, and notifications.</p>
+
+<h2>Account</h2>
+<form method="post" class="form-box">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="action" value="update_profile">
+    <label>Name</label>
+    <input type="text" name="name" value="{{ current_user.name }}" required>
+    <label>Email</label>
+    <input type="email" name="email" value="{{ current_user.email }}" required>
+    <label>Year</label>
+    <select name="year" required>
+        {% for y in years %}<option value="{{ y }}" {% if y == current_user.year %}selected{% endif %}>{{ y }}</option>{% endfor %}
+    </select>
+    <label>Branch</label>
+    <select name="branch" required>
+        {% for b in branches %}<option value="{{ b }}" {% if b == current_user.branch %}selected{% endif %}>{{ b }}</option>{% endfor %}
+    </select>
+    <button type="submit">Save Profile</button>
+</form>
+
+<h2>Appearance</h2>
+<form method="post" class="form-box">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="action" value="update_appearance">
+    <label>Theme</label>
+    <select name="theme">
+        <option value="light" {% if current_user.theme == 'light' %}selected{% endif %}>Light</option>
+        <option value="dark" {% if current_user.theme == 'dark' %}selected{% endif %}>Dark</option>
+    </select>
+    <button type="submit">Save Appearance</button>
+</form>
+
+<h2>Notifications</h2>
+<form method="post" class="form-box">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="action" value="update_notifications">
+    <label style="display:flex; align-items:center; gap:8px; text-transform:none; font-weight:400;">
+        <input type="checkbox" name="notify_comments" {% if current_user.notify_comments %}checked{% endif %} style="width:auto;"> Comments on my resources
+    </label>
+    <label style="display:flex; align-items:center; gap:8px; text-transform:none; font-weight:400;">
+        <input type="checkbox" name="notify_requests" {% if current_user.notify_requests %}checked{% endif %} style="width:auto;"> Resource request activity
+    </label>
+    <label style="display:flex; align-items:center; gap:8px; text-transform:none; font-weight:400;">
+        <input type="checkbox" name="notify_ratings" {% if current_user.notify_ratings %}checked{% endif %} style="width:auto;"> Ratings on my resources
+    </label>
+    <label style="display:flex; align-items:center; gap:8px; text-transform:none; font-weight:400;">
+        <input type="checkbox" name="notify_moderation" {% if current_user.notify_moderation %}checked{% endif %} style="width:auto;"> Reports/moderation updates
+    </label>
+    <button type="submit">Save Notification Preferences</button>
+</form>
+
+<h2>Privacy</h2>
+<form method="post" class="form-box">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="action" value="update_privacy">
+    <label style="display:flex; align-items:center; gap:8px; text-transform:none; font-weight:400;">
+        <input type="checkbox" name="show_profile_on_uploads" {% if current_user.show_profile_on_uploads %}checked{% endif %} style="width:auto;"> Show my name on resources I upload
+    </label>
+    <button type="submit">Save Privacy Settings</button>
+</form>
+
+<h2>Security</h2>
+<form method="post" class="form-box">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="action" value="change_password">
+    <label>Current Password</label>
+    <input type="password" name="current_password" required>
+    <label>New Password</label>
+    <input type="password" name="new_password" minlength="6" required>
+    <label>Confirm New Password</label>
+    <input type="password" name="confirm_password" minlength="6" required>
+    <button type="submit">Change Password</button>
+</form>
+<p><a href="{{ url_for('logout') }}">Log out</a></p>
+
+<h2>Delete Account</h2>
+<form method="post" class="form-box" onsubmit="return confirm('This will permanently delete your account and uploads. Continue?');">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="action" value="delete_account">
+    <label>Type DELETE to confirm</label>
+    <input type="text" name="confirm_text" placeholder="DELETE" required>
+    <button type="submit" class="btn-danger" style="background: var(--danger);">Delete My Account</button>
+</form>
+
+{% endblock %}

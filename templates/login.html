@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Login - Campus Share{% endblock %}
+{% block content %}
+
+<h1>Login</h1>
+<p class="page-sub">Welcome back — access resources shared by your batch.</p>
+<form method="post" class="form-box">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Email</label>
+    <input type="email" name="email" required>
+
+    <label>Password</label>
+    <input type="password" name="password" required>
+
+    <button type="submit">Login</button>
+</form>
+<p>Don't have an account? <a href="{{ url_for('register') }}">Register</a></p>
+
+{% endblock %}

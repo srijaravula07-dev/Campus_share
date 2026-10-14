@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Recently Viewed - Campus Share{% endblock %}
+{% block content %}
+
+<h1>Recently Viewed</h1>
+<p class="page-sub">Resources you've opened recently.</p>
+
+{% if views %}
+<div class="resource-grid">
+    {% for v in views %}
+    <div class="resource-card">
+        <span class="ext-tag">{{ v.resource.filename|file_ext }}</span>
+        <h3><a href="{{ url_for('view_resource', resource_id=v.resource.id) }}">{{ v.resource.subject }}</a></h3>
+        <div class="tag-row">
+            <span class="tag">{{ v.resource.year }}</span>
+            <span class="tag">{{ v.resource.branch }}</span>
+        </div>
+        <p class="meta">Viewed {{ v.viewed_at.strftime('%d %b %Y, %H:%M') }}</p>
+        <a class="btn-small" href="{{ url_for('download', resource_id=v.resource.id) }}">Download</a>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <span class="glyph">◇</span>
+    <p>Nothing viewed yet. <a href="{{ url_for('index') }}">Browse resources</a>.</p>
+</div>
+{% endif %}
+
+{% endblock %}

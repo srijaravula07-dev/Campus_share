@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Senior Connect - Campus Share{% endblock %}
+{% block content %}
+
+<h1>Senior Connect</h1>
+<p class="page-sub">Find a senior who can mentor you in a subject you're struggling with.</p>
+
+<form method="get" class="filter-form">
+    <input type="text" name="subject" placeholder="Search by subject..." value="{{ selected_subject }}" style="flex:2; min-width:180px;">
+    <select name="year">
+        <option value="">All Years</option>
+        {% for y in years %}<option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>{% endfor %}
+    </select>
+    <select name="branch">
+        <option value="">All Branches</option>
+        {% for b in branches %}<option value="{{ b }}" {% if b == selected_branch %}selected{% endif %}>{{ b }}</option>{% endfor %}
+    </select>
+    <button type="submit">Apply</button>
+    <a href="{{ url_for('list_mentors') }}" class="clear-link">Clear</a>
+    {% if is_eligible %}
+    <a href="{{ url_for('mentor_profile') }}" class="cta" style="margin-left:auto; padding:9px 16px; border-radius:3px; text-decoration:none;">
+        {{ 'Edit Mentor Profile' if my_mentor_profile else 'Become a Mentor' }}
+    </a>
+    {% endif %}
+</form>
+
+{% if mentors %}
+<div class="resource-grid">
+    {% for m in mentors %}
+    <div class="resource-card">
+        <h3>{{ m.user.name }}</h3>
+        <div class="tag-row">
+            <span class="tag">{{ m.user.year }}</span>
+            <span class="tag">{{ m.user.branch }}</span>
+        </div>
+        <div class="tag-row">
+            {% for s in m.subject_list() %}<span class="tag">{{ s }}</span>{% endfor %}
+        </div>
+        {% if m.bio %}<p class="meta" style="color: var(--ink); margin-top:8px;">{{ m.bio }}</p>{% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <span class="glyph">◇</span>
+    <p>No mentors are currently available for this subject. Try clearing your filters.</p>
+</div>
+{% endif %}
+
+{% endblock %}

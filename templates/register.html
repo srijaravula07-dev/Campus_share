@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Register - Campus Share{% endblock %}
+{% block content %}
+
+<h1>Register</h1>
+<p class="page-sub">Create your account to upload and download resources.</p>
+<form method="post" class="form-box">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Name</label>
+    <input type="text" name="name" required>
+
+    <label>College Email</label>
+    <input type="email" name="email" required>
+
+    <label>Password</label>
+    <input type="password" name="password" minlength="6" required>
+
+    <label>Confirm Password</label>
+    <input type="password" name="confirm_password" minlength="6" required>
+
+    <label>Year</label>
+    <select name="year" required>
+        <option value="" disabled selected>Select Year</option>
+        {% for y in years %}<option value="{{ y }}">{{ y }}</option>{% endfor %}
+    </select>
+
+    <label>Branch</label>
+    <select name="branch" required>
+        <option value="" disabled selected>Select Branch</option>
+        {% for b in branches %}<option value="{{ b }}">{{ b }}</option>{% endfor %}
+    </select>
+
+    <button type="submit">Create Account</button>
+</form>
+<p>Already have an account? <a href="{{ url_for('login') }}">Login</a></p>
+
+{% endblock %}

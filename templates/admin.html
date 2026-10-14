@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Admin - Campus Share{% endblock %}
+{% block content %}
+
+<h1>Moderation Dashboard</h1>
+<p class="page-sub">Low-quality threshold: below {{ threshold }}★ with at least {{ min_ratings }} ratings.</p>
+
+<h2>Open Reports</h2>
+{% if open_reports %}
+{% for r in open_reports %}
+<div class="comment">
+    <p class="meta">{{ r.timestamp.strftime('%d %b %Y') }} · {{ r.reporter.name }} reported <a href="{{ url_for('view_resource', resource_id=r.resource_id) }}">{{ r.resource.subject }}</a></p>
+    <p><strong>{{ r.reason }}</strong>{% if r.description %} — {{ r.description }}{% endif %}</p>
+    <form method="post" action="{{ url_for('admin_handle_report', report_id=r.id, action='resolve') }}" style="display:inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="link-btn">Resolve</button>
+    </form>
+    <form method="post" action="{{ url_for('admin_handle_report', report_id=r.id, action='dismiss') }}" style="display:inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="link-btn">Dismiss</button>
+    </form>
+    <form method="post" action="{{ url_for('admin_handle_report', report_id=r.id, action='remove_resource') }}" style="display:inline;" onsubmit="return confirm('Remove this resource from Campus Share?');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="link-btn" style="color: var(--danger);">Remove Resource</button>
+    </form>
+</div>
+{% endfor %}
+{% else %}
+<p class="meta">No open reports.</p>
+{% endif %}
+
+<h2>Needs Review (Low Quality)</h2>
+{% if needs_review %}
+{% for r in needs_review %}
+<div class="comment">
+    <p class="meta"><a href="{{ url_for('view_resource', resource_id=r.id) }}">{{ r.subject }}</a> · {{ r.avg_rating() }}★ ({{ r.rating_count() }} ratings)</p>
+    <form method="post" action="{{ url_for('admin_handle_resource', resource_id=r.id, action='approve') }}" style="display:inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="link-btn">Approve</button>
+    </form>
+    <form method="post" action="{{ url_for('admin_handle_resource', resource_id=r.id, action='remove') }}" style="display:inline;" onsubmit="return confirm('Remove this resource?');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="link-btn" style="color: var(--danger);">Remove</button>
+    </form>
+</div>
+{% endfor %}
+{% else %}
+<p class="meta">No resources currently flagged.</p>
+{% endif %}
+
+<h2>Open Resource Requests</h2>
+{% if open_requests %}
+{% for r in open_requests %}
+<div class="comment">
+    <p class="meta"><a href="{{ url_for('view_request', request_id=r.id) }}">{{ r.title }}</a> — {{ r.requester.name }} · {{ r.timestamp.strftime('%d %b %Y') }}</p>
+</div>
+{% endfor %}
+{% else %}
+<p class="meta">No open requests.</p>
+{% endif %}
+
+{% endblock %}

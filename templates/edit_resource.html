@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Edit Resource{% endblock %}
+{% block content %}
+
+<h1>Edit Resource</h1>
+<form method="post" class="form-box">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Subject</label>
+    <input type="text" name="subject" value="{{ resource.subject }}" required>
+
+    <label>Description</label>
+    <textarea name="description" rows="3">{{ resource.description or '' }}</textarea>
+
+    <label>Year</label>
+    <select name="year" required>
+        {% for y in years %}<option value="{{ y }}" {% if y == resource.year %}selected{% endif %}>{{ y }}</option>{% endfor %}
+    </select>
+
+    <label>Branch</label>
+    <select name="branch" required>
+        {% for b in branches %}<option value="{{ b }}" {% if b == resource.branch %}selected{% endif %}>{{ b }}</option>{% endfor %}
+    </select>
+
+    <label style="display:flex; align-items:center; gap:8px; text-transform:none; font-weight:400;">
+        <input type="checkbox" name="allow_comments" {% if resource.allow_comments %}checked{% endif %} style="width:auto;">
+        Allow comments on this resource
+    </label>
+
+    <button type="submit">Save Changes</button>
+</form>
+
+{% endblock %}

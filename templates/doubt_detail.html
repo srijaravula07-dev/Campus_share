@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}{{ doubt.title }} - Campus Share{% endblock %}
+{% block content %}
+
+<div class="resource-header">
+    {% if doubt.status == 'resolved' %}<span class="tag tag-success">Resolved</span>{% else %}<span class="tag tag-active">Open</span>{% endif %}
+    <h1>{{ doubt.title }}</h1>
+    <div class="tag-row">
+        <span class="tag">{{ doubt.subject }}</span>
+        {% if doubt.tag %}<span class="tag">{{ doubt.tag }}</span>{% endif %}
+    </div>
+    <p class="meta">Asked by {{ doubt.asker.name }} on {{ doubt.created_at.strftime('%d %b %Y') }}</p>
+    {% if doubt.description %}<p style="margin-top:12px;">{{ doubt.description }}</p>{% endif %}
+</div>
+
+<h2>{{ answers|length }} Answer{{ 's' if answers|length != 1 }}</h2>
+
+<form method="post" class="form-box">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <textarea name="content" rows="3" placeholder="Write an answer..." required></textarea>
+    <button type="submit">Post Answer</button>
+</form>
+
+<div class="comments" style="margin-top: 18px;">
+    {% for a in answers %}
+    <div class="comment" style="{% if a.is_accepted %}border-left-color: var(--gold); background: var(--success-bg);{% endif %}">
+        {% if a.is_accepted %}<p class="meta" style="color: var(--gold); font-weight:600;">✓ Accepted Answer</p>{% endif %}
+        <p class="meta"><strong>{{ a.author.name }}</strong> · {{ a.created_at.strftime('%d %b %Y %H:%M') }}</p>
+        <p>{{ a.content }}</p>
+        {% if doubt.user_id == current_user.id and not a.is_accepted %}
+        <form method="post" action="{{ url_for('accept_doubt_answer', answer_id=a.id) }}" style="display:inline;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="link-btn">Mark as Accepted</button>
+        </form>
+        {% endif %}
+        {% if a.user_id == current_user.id %}
+        <details style="margin-top:6px; display:inline-block;">
+            <summary class="link-btn" style="cursor:pointer; display:inline;">Edit</summary>
+            <form method="post" action="{{ url_for('edit_doubt_answer', answer_id=a.id) }}" class="form-box" style="margin-top:8px;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <textarea name="content" rows="3" required>{{ a.content }}</textarea>
+                <button type="submit" class="btn-small">Save</button>
+            </form>
+        </details>
+        {% endif %}
+        {% if a.user_id == current_user.id or current_user.is_admin() %}
+        <form method="post" action="{{ url_for('delete_doubt_answer', answer_id=a.id) }}" style="display:inline;" onsubmit="return confirm('Delete this answer?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="link-btn">Delete</button>
+        </form>
+        {% endif %}
+    </div>
+    {% else %}
+    <p class="meta">No answers yet. Be the first to help.</p>
+    {% endfor %}
+</div>
+
+{% endblock %}

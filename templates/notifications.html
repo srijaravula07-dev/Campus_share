@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Notifications - Campus Share{% endblock %}
+{% block content %}
+
+<h1>Notifications</h1>
+
+{% if notifs %}
+<div class="comments">
+    {% for n in notifs %}
+    <div class="comment" style="{% if not n.is_read %}border-left-color: var(--gold);{% endif %}">
+        <p class="meta">{{ n.timestamp.strftime('%d %b %Y %H:%M') }}</p>
+        <p>{% if n.link %}<a href="{{ n.link }}">{{ n.message }}</a>{% else %}{{ n.message }}{% endif %}</p>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <span class="glyph">◇</span>
+    <p>No notifications yet.</p>
+</div>
+{% endif %}
+
+{% endblock %}

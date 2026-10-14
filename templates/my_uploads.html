@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}My Uploads - Campus Share{% endblock %}
+{% block content %}
+
+<h1>My Uploads</h1>
+<p class="page-sub">Resources you've shared with your batch.</p>
+
+{% if resources %}
+<div class="resource-grid">
+    {% for r in resources %}
+    <div class="resource-card">
+        <span class="ext-tag">{{ r.filename|file_ext }}</span>
+        {% if r.review_status == 'needs_review' %}<span class="tag tag-warn">Needs Review</span>{% endif %}
+        <h3><a href="{{ url_for('view_resource', resource_id=r.id) }}">{{ r.subject }}</a></h3>
+        <div class="tag-row">
+            <span class="tag">{{ r.year }}</span>
+            <span class="tag">{{ r.branch }}</span>
+            <span class="tag">{{ 'Comments on' if r.allow_comments else 'Comments off' }}</span>
+        </div>
+        <p class="meta">Uploaded {{ r.upload_date.strftime('%d %b %Y') }} · {{ r.download_count }} downloads</p>
+        <p class="meta">{% if r.rating_count() %}{{ r.avg_rating() }} ★ ({{ r.rating_count() }}){% else %}No ratings yet{% endif %}</p>
+        <a class="btn-small" href="{{ url_for('view_resource', resource_id=r.id) }}">View</a>
+        <a class="btn-small btn-outline" href="{{ url_for('edit_resource', resource_id=r.id) }}">Edit</a>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <span class="glyph">◇</span>
+    <p>You haven't uploaded anything yet. <a href="{{ url_for('upload') }}">Upload your first resource</a>.</p>
+</div>
+{% endif %}
+
+{% endblock %}

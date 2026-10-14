@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% block title %}{{ resource.subject }} - Campus Share{% endblock %}
+{% block content %}
+
+<div class="resource-header">
+    <span class="ext-tag">{{ resource.filename|file_ext }}</span>
+    {% if resource.review_status == 'needs_review' %}<span class="tag tag-warn">Needs Review</span>{% endif %}
+    <h1>{{ resource.subject }}</h1>
+    <div class="tag-row">
+        <span class="tag">{{ resource.year }}</span>
+        <span class="tag">{{ resource.branch }}</span>
+    </div>
+    <p class="meta">Uploaded by {{ resource.uploader.name if resource.uploader.show_profile_on_uploads else 'a student' }} on {{ resource.upload_date.strftime('%d %b %Y') }}</p>
+    <p class="meta">File: {{ resource.original_filename }} · {{ resource.download_count }} downloads</p>
+    <p class="meta">{% if resource.rating_count() %}{{ resource.avg_rating() }} ★ from {{ resource.rating_count() }} rating{{ 's' if resource.rating_count() != 1 }}{% else %}No ratings yet{% endif %}</p>
+
+    {% if resource.description %}
+    <p style="margin-top: 12px;">{{ resource.description }}</p>
+    {% endif %}
+
+    {% if resource.ai_summary %}
+    <div class="summary-box" style="margin-top: 14px; padding: 12px 16px; background: var(--surface); border-left: 3px solid var(--moss); border-radius: var(--radius);">
+        <strong style="color: var(--moss-dark); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Quick Summary</strong>
+        <p style="margin: 6px 0 0 0; font-size: 14px; line-height: 1.5; color: var(--ink);">{{ resource.ai_summary }}</p>
+    </div>
+    {% endif %}
+
+    <div class="action-row">
+        {% if resource.filename|file_ext == 'pdf' %}
+        <a class="btn-small" href="{{ url_for('view_file', resource_id=resource.id) }}" target="_blank">View PDF</a>
+        {% endif %}
+        <a class="btn-small" href="{{ url_for('download', resource_id=resource.id) }}">Download</a>
+        <form method="post" action="{{ url_for('toggle_bookmark', resource_id=resource.id) }}" style="display:inline;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn-small btn-outline">{{ 'Remove Bookmark' if is_bookmarked else 'Bookmark' }}</button>
+        </form>
+        {% if resource.uploader_id == current_user.id or current_user.is_admin() %}
+        <a class="btn-small btn-outline" href="{{ url_for('edit_resource', resource_id=resource.id) }}">Edit</a>
+        <form method="post" action="{{ url_for('delete_resource', resource_id=resource.id) }}" style="display:inline;" onsubmit="return confirm('Delete this resource permanently?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn-small btn-danger">Delete</button>
+        </form>
+        {% endif %}
+    </div>
+
+    {% if resource.filename|file_ext == 'pdf' %}
+    <div class="pdf-embed">
+        <iframe src="{{ url_for('view_file', resource_id=resource.id) }}" width="100%" height="500" style="border:1px solid var(--line); border-radius: var(--radius); margin-top:16px;"></iframe>
+    </div>
+    {% endif %}
+</div>
+
+<h2>Rate this resource</h2>
+<form method="post" action="{{ url_for('rate_resource', resource_id=resource.id) }}" class="star-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% for i in range(1, 6) %}
+    <button type="submit" name="value" value="{{ i }}" class="star-btn {% if my_rating and i <= my_rating %}star-filled{% endif %}">★</button>
+    {% endfor %}
+    {% if my_rating %}<span class="meta">Your rating: {{ my_rating }} ★</span>{% endif %}
+</form>
+
+<h2>Report this resource</h2>
+<details class="report-details">
+    <summary>Something wrong with this resource?</summary>
+    <form method="post" action="{{ url_for('report_resource', resource_id=resource.id) }}" class="form-box" style="margin-top:10px;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label>Reason</label>
+        <select name="reason" required>
+            <option value="" disabled selected>Select a reason</option>
+            {% for reason in report_reasons %}<option value="{{ reason }}">{{ reason }}</option>{% endfor %}
+        </select>
+        <label>Details <span style="text-transform:none; font-weight:400;">(optional)</span></label>
+        <textarea name="description" rows="2" placeholder="Add any extra detail..."></textarea>
+        <button type="submit">Submit Report</button>
+    </form>
+</details>
+
+<h2>Comments</h2>
+
+{% if resource.allow_comments %}
+<form method="post" class="form-box">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <textarea name="content" rows="3" placeholder="Write a comment..." required></textarea>
+    <button type="submit">Post Comment</button>
+</form>
+{% else %}
+<p class="meta">Comments are disabled for this resource.</p>
+{% endif %}
+
+<div class="comments" style="margin-top: 18px;">
+    {% for c in comments %}
+    <div class="comment">
+        <p class="meta"><strong>{{ c.author.name }}</strong> · {{ c.timestamp.strftime('%d %b %Y %H:%M') }}</p>
+        <p>{{ c.content }}</p>
+        {% if c.user_id == current_user.id %}
+        <details style="margin-top:6px; display:inline-block;">
+            <summary class="link-btn" style="cursor:pointer; display:inline;">Edit</summary>
+            <form method="post" action="{{ url_for('edit_comment', comment_id=c.id) }}" class="form-box" style="margin-top:8px;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <textarea name="content" rows="2" required>{{ c.content }}</textarea>
+                <button type="submit" class="btn-small">Save</button>
+            </form>
+        </details>
+        {% endif %}
+        {% if c.user_id == current_user.id or resource.uploader_id == current_user.id or current_user.is_admin() %}
+        <form method="post" action="{{ url_for('delete_comment', comment_id=c.id) }}" style="display:inline;" onsubmit="return confirm('Delete this comment?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="link-btn">Delete</button>
+        </form>
+        {% endif %}
+    </div>
+    {% else %}
+    <p class="meta">No comments yet. Be the first to share your thoughts.</p>
+    {% endfor %}
+</div>
+
+<h2>Related Resources</h2>
+{% if related %}
+<div class="resource-grid">
+    {% for r in related %}
+    <div class="resource-card">
+        <span class="ext-tag">{{ r.filename|file_ext }}</span>
+        <h3><a href="{{ url_for('view_resource', resource_id=r.id) }}">{{ r.subject }}</a></h3>
+        <div class="tag-row">
+            <span class="tag">{{ r.year }}</span>
+            <span class="tag">{{ r.branch }}</span>
+        </div>
+        <a class="btn-small" href="{{ url_for('view_resource', resource_id=r.id) }}">View Resource</a>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p class="meta">No related resources found yet.</p>
+{% endif %}
+
+{% endblock %}

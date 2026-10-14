@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Bookmarks - Campus Share{% endblock %}
+{% block content %}
+
+<h1>Bookmarks</h1>
+<p class="page-sub">Resources you've saved for later.</p>
+
+{% if marks %}
+<div class="resource-grid">
+    {% for m in marks %}
+    <div class="resource-card">
+        <span class="ext-tag">{{ m.resource.filename|file_ext }}</span>
+        <h3><a href="{{ url_for('view_resource', resource_id=m.resource.id) }}">{{ m.resource.subject }}</a></h3>
+        <div class="tag-row">
+            <span class="tag">{{ m.resource.year }}</span>
+            <span class="tag">{{ m.resource.branch }}</span>
+        </div>
+        <p class="meta">Saved {{ m.timestamp.strftime('%d %b %Y') }}</p>
+        <a class="btn-small" href="{{ url_for('view_resource', resource_id=m.resource.id) }}">View Resource</a>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <span class="glyph">◇</span>
+    <p>You haven't saved any resources yet. <a href="{{ url_for('index') }}">Browse resources</a>.</p>
+</div>
+{% endif %}
+
+{% endblock %}

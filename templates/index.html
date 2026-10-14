@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Browse Resources - Campus Share{% endblock %}
+{% block content %}
+
+<h1>Browse Resources</h1>
+<p class="page-sub">Notes, slides and papers shared by your batch.</p>
+
+<form method="get" class="filter-form">
+    <input type="text" name="q" placeholder="Search title, subject, description..." value="{{ selected_q }}" style="flex:2; min-width:200px;">
+
+    <select name="year">
+        <option value="">All Years</option>
+        {% for y in years %}<option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>{% endfor %}
+    </select>
+
+    <select name="branch">
+        <option value="">All Branches</option>
+        {% for b in branches %}<option value="{{ b }}" {% if b == selected_branch %}selected{% endif %}>{{ b }}</option>{% endfor %}
+    </select>
+
+    <input type="text" name="subject" placeholder="Subject..." value="{{ selected_subject }}" style="max-width:140px;">
+
+    <select name="type">
+        <option value="">All File Types</option>
+        {% for t in file_types %}<option value="{{ t }}" {% if t == selected_type %}selected{% endif %}>{{ t|upper }}</option>{% endfor %}
+    </select>
+
+    <select name="sort">
+        <option value="latest" {% if selected_sort == 'latest' %}selected{% endif %}>Latest</option>
+        <option value="downloads" {% if selected_sort == 'downloads' %}selected{% endif %}>Most Downloaded</option>
+        <option value="rating" {% if selected_sort == 'rating' %}selected{% endif %}>Highest Rated</option>
+    </select>
+
+    <button type="submit">Apply</button>
+    <a href="{{ url_for('index') }}" class="clear-link">Clear</a>
+</form>
+
+{% if resources %}
+<div class="resource-grid">
+    {% for r in resources %}
+    <div class="resource-card">
+        <span class="ext-tag">{{ r.filename|file_ext }}</span>
+        {% if r.review_status == 'needs_review' %}<span class="tag tag-warn">Needs Review</span>{% endif %}
+        <h3><a href="{{ url_for('view_resource', resource_id=r.id) }}">{{ r.subject }}</a></h3>
+        <div class="tag-row">
+            <span class="tag">{{ r.year }}</span>
+            <span class="tag">{{ r.branch }}</span>
+        </div>
+        <p class="meta">By {{ r.uploader.name if r.uploader.show_profile_on_uploads else 'a student' }} · {{ r.upload_date.strftime('%d %b %Y') }}</p>
+        <p class="meta">{% if r.rating_count() %}{{ r.avg_rating() }} ★ ({{ r.rating_count() }}){% else %}No ratings yet{% endif %} · {{ r.download_count }} downloads</p>
+        {% if r.description %}
+        <p class="meta" style="color: var(--ink); margin-top: 6px;">{{ r.description[:80] }}{% if r.description|length > 80 %}…{% endif %}</p>
+        {% endif %}
+        <a class="btn-small" href="{{ url_for('view_resource', resource_id=r.id) }}">View Resource</a>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <span class="glyph">◇</span>
+    <p>No resources match your filters. Try clearing them, or <a href="{{ url_for('upload') }}">share one</a>.</p>
+</div>
+{% endif %}
+
+{% endblock %}

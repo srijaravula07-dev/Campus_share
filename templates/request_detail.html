@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}{{ req.title }} - Campus Share{% endblock %}
+{% block content %}
+
+<div class="resource-header">
+    <span class="tag {% if req.status == 'open' %}tag-active{% elif req.status == 'fulfilled' %}tag-success{% endif %}">{{ req.status|capitalize }}</span>
+    <h1>{{ req.title }}</h1>
+    <div class="tag-row">
+        <span class="tag">{{ req.year }}</span>
+        <span class="tag">{{ req.branch }}</span>
+        <span class="tag">{{ req.subject }}</span>
+    </div>
+    <p class="meta">Requested by {{ req.requester.name }} on {{ req.timestamp.strftime('%d %b %Y') }}</p>
+    {% if req.description %}<p style="margin-top:12px;">{{ req.description }}</p>{% endif %}
+
+    {% if req.fulfilled_resource %}
+    <p class="meta" style="margin-top:10px;">Fulfilled with: <a href="{{ url_for('view_resource', resource_id=req.fulfilled_resource.id) }}">{{ req.fulfilled_resource.subject }}</a></p>
+    {% endif %}
+
+    {% if req.user_id == current_user.id and req.status != 'closed' %}
+    <form method="post" style="margin-top:12px; display:inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="mark_status">
+        <input type="hidden" name="status" value="closed">
+        <button type="submit" class="btn-small btn-outline">Close Request</button>
+    </form>
+    {% endif %}
+</div>
+
+{% if req.status == 'open' %}
+<h2>Fulfill this request</h2>
+<p class="meta">Attach an existing Campus Share resource that matches, or <a href="{{ url_for('upload') }}">upload a new one</a> and come back to attach it.</p>
+
+{% if candidate_resources %}
+<form method="post" class="form-box">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="action" value="fulfill_existing">
+    <label>Choose a matching resource</label>
+    <select name="resource_id" required>
+        <option value="" disabled selected>Select a resource</option>
+        {% for r in candidate_resources %}<option value="{{ r.id }}">{{ r.subject }} ({{ r.year }}, {{ r.branch }})</option>{% endfor %}
+    </select>
+    <button type="submit">Fulfill Request</button>
+</form>
+{% else %}
+<p class="meta">No matching resources found yet for this subject.</p>
+{% endif %}
+{% endif %}
+
+{% endblock %}

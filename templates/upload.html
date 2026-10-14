@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}Upload - Campus Share{% endblock %}
+{% block content %}
+
+<h1>Upload a Resource</h1>
+<p class="page-sub">Share notes, slides, or any study material with your batch.</p>
+
+<form method="post" enctype="multipart/form-data" class="form-box" id="upload-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Subject</label>
+    <input type="text" name="subject" placeholder="e.g. Data Structures" required>
+
+    <label>Description <span style="text-transform:none; font-weight:400;">(optional)</span></label>
+    <textarea name="description" rows="3" placeholder="What's in this file? e.g. Unit 3 notes covering trees and graphs, exam-ready."></textarea>
+
+    <label>Year</label>
+    <select name="year" required>
+        <option value="" disabled selected>Select Year</option>
+        {% for y in years %}<option value="{{ y }}">{{ y }}</option>{% endfor %}
+    </select>
+
+    <label>Branch</label>
+    <select name="branch" required>
+        <option value="" disabled selected>Select Branch</option>
+        {% for b in branches %}<option value="{{ b }}">{{ b }}</option>{% endfor %}
+    </select>
+
+    <label>File</label>
+    <div class="dropzone" id="dropzone">
+        <span class="dz-glyph">⇪</span>
+        <span id="dz-text">Drag a file here, or click to browse</span>
+        <span class="dz-filename" id="dz-filename"></span>
+        <input type="file" name="file" id="file-input"
+               accept=".pdf,.ppt,.pptx,.doc,.docx,.txt,.xls,.xlsx,.zip,.jpg,.jpeg,.png" required>
+    </div>
+    <p class="form-hint">Accepted: PDF, PPT/PPTX, DOC/DOCX, XLS/XLSX, TXT, ZIP, JPG, PNG — up to 25MB. Duplicate file contents are detected automatically.</p>
+
+    <label style="display:flex; align-items:center; gap:8px; text-transform:none; font-weight:400; margin-top:4px;">
+        <input type="checkbox" name="allow_comments" checked style="width:auto;">
+        Allow comments on this resource
+    </label>
+
+    <button type="submit">Upload</button>
+</form>
+
+<script>
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('file-input');
+const dzText = document.getElementById('dz-text');
+const dzFilename = document.getElementById('dz-filename');
+
+dropzone.addEventListener('click', () => fileInput.click());
+
+fileInput.addEventListener('change', () => {
+    if (fileInput.files.length) {
+        dzText.textContent = 'Selected:';
+        dzFilename.textContent = fileInput.files[0].name;
+    }
+});
+
+['dragenter', 'dragover'].forEach(evt => {
+    dropzone.addEventListener(evt, (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+});
+['dragleave', 'drop'].forEach(evt => {
+    dropzone.addEventListener(evt, (e) => { e.preventDefault(); dropzone.classList.remove('dragover'); });
+});
+dropzone.addEventListener('drop', (e) => {
+    const files = e.dataTransfer.files;
+    if (files.length) {
+        fileInput.files = files;
+        dzText.textContent = 'Selected:';
+        dzFilename.textContent = files[0].name;
+    }
+});
+</script>
+
+{% endblock %}

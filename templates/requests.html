@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Resource Requests - Campus Share{% endblock %}
+{% block content %}
+
+<h1>Resource Requests</h1>
+<p class="page-sub">Ask your batch for notes or material you're missing.</p>
+
+<div class="filter-form">
+    <a href="{{ url_for('list_requests', status='open') }}" class="tag {% if selected_status == 'open' %}tag-active{% endif %}">Open</a>
+    <a href="{{ url_for('list_requests', status='fulfilled') }}" class="tag {% if selected_status == 'fulfilled' %}tag-active{% endif %}">Fulfilled</a>
+    <a href="{{ url_for('list_requests', status='closed') }}" class="tag {% if selected_status == 'closed' %}tag-active{% endif %}">Closed</a>
+    <a href="{{ url_for('new_request') }}" class="cta" style="margin-left:auto; padding:8px 16px; border-radius:3px; text-decoration:none;">+ New Request</a>
+</div>
+
+{% if requests %}
+<div class="resource-grid">
+    {% for r in requests %}
+    <div class="resource-card">
+        <span class="tag {% if r.status == 'open' %}tag-active{% elif r.status == 'fulfilled' %}tag-success{% else %}{% endif %}">{{ r.status|capitalize }}</span>
+        <h3><a href="{{ url_for('view_request', request_id=r.id) }}">{{ r.title }}</a></h3>
+        <div class="tag-row">
+            <span class="tag">{{ r.year }}</span>
+            <span class="tag">{{ r.branch }}</span>
+            <span class="tag">{{ r.subject }}</span>
+        </div>
+        <p class="meta">By {{ r.requester.name }} · {{ r.timestamp.strftime('%d %b %Y') }}</p>
+        <a class="btn-small" href="{{ url_for('view_request', request_id=r.id) }}">View Request</a>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <span class="glyph">◇</span>
+    <p>There are no {{ selected_status }} resource requests right now.</p>
+</div>
+{% endif %}
+
+{% endblock %}

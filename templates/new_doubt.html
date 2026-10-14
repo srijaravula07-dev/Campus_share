@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Ask a Doubt - Campus Share{% endblock %}
+{% block content %}
+
+<h1>Ask a Doubt</h1>
+<p class="page-sub">Describe what you're stuck on — your batch can help.</p>
+
+<form method="post" class="form-box">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Subject</label>
+    <input type="text" name="subject" placeholder="e.g. Computer Networks" required>
+
+    <label>Question</label>
+    <input type="text" name="title" placeholder="e.g. Can someone explain how Selective Repeat ARQ works?" required>
+
+    <label>Details <span style="text-transform:none; font-weight:400;">(optional)</span></label>
+    <textarea name="description" rows="4" placeholder="Add any extra context..."></textarea>
+
+    <label>Unit / Tag <span style="text-transform:none; font-weight:400;">(optional)</span></label>
+    <input type="text" name="tag" placeholder="e.g. Unit 3">
+
+    <button type="submit">Post Doubt</button>
+</form>
+
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Mentor Profile - Campus Share{% endblock %}
+{% block content %}
+
+<h1>{{ 'Edit Mentor Profile' if profile else 'Become a Mentor' }}</h1>
+<p class="page-sub">Only 3rd and 4th year students can mentor juniors. Available for: {{ current_user.year }}.</p>
+
+<form method="post" class="form-box">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Subjects you can help with <span style="text-transform:none; font-weight:400;">(comma-separated)</span></label>
+    <input type="text" name="subjects" placeholder="e.g. DBMS, Computer Networks, Operating Systems"
+           value="{{ profile.subjects if profile else '' }}" required>
+
+    <label>Short bio <span style="text-transform:none; font-weight:400;">(optional)</span></label>
+    <textarea name="bio" rows="3" placeholder="A line or two about yourself...">{{ profile.bio if profile else '' }}</textarea>
+
+    <label style="display:flex; align-items:center; gap:8px; text-transform:none; font-weight:400;">
+        <input type="checkbox" name="is_active" {% if not profile or profile.is_active %}checked{% endif %} style="width:auto;">
+        Available for mentoring
+    </label>
+
+    <button type="submit">Save Mentor Profile</button>
+</form>
+
+{% endblock %}

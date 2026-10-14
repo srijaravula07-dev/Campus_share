@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Duplicate File Detected{% endblock %}
+{% block content %}
+
+<h1>Duplicate File Detected</h1>
+<p class="page-sub">An identical file already exists on Campus Share.</p>
+
+<div class="resource-card" style="max-width:420px;">
+    <span class="ext-tag">{{ existing.filename|file_ext }}</span>
+    <h3><a href="{{ url_for('view_resource', resource_id=existing.id) }}">{{ existing.subject }}</a></h3>
+    <div class="tag-row">
+        <span class="tag">{{ existing.year }}</span>
+        <span class="tag">{{ existing.branch }}</span>
+    </div>
+    <p class="meta">Uploaded by {{ existing.uploader.name }} on {{ existing.upload_date.strftime('%d %b %Y') }}</p>
+    <a class="btn-small" href="{{ url_for('view_resource', resource_id=existing.id) }}">View Existing Resource</a>
+</div>
+
+<p style="margin-top:20px;">You can view the existing resource above, or upload your file anyway if this is a legitimately different resource (e.g. same file, different subject/year metadata).</p>
+
+<form method="post" action="{{ url_for('upload_confirm') }}" enctype="multipart/form-data" class="form-box">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="subject" value="{{ subject }}">
+    <input type="hidden" name="description" value="{{ description }}">
+    <input type="hidden" name="year" value="{{ year }}">
+    <input type="hidden" name="branch" value="{{ branch }}">
+    {% if allow_comments %}<input type="hidden" name="allow_comments" value="on">{% endif %}
+
+    <label>Re-select the same file to confirm</label>
+    <input type="file" name="file" required>
+
+    <button type="submit">Upload Anyway</button>
+</form>
+<p><a href="{{ url_for('upload') }}">Cancel and go back</a></p>
+
+{% endblock %}
